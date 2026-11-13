@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>جولة المدرسة ثلاثية الأبعاد – مدرسة البنات، جبل عمّان</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f0e2;--ink:#3a1018;--bur:#6d1a2b;--gold:#9c7a3c;--panel:#fbf7ee;--line:#d8c9a6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1216;--ink:#f1e8d6;--bur:#c9677a;--gold:#cfae6a;--panel:#2a1a20;--line:#4a3438}}
+:root[data-theme="dark"]{--bg:#1d1216;--ink:#f1e8d6;--bur:#c9677a;--gold:#cfae6a;--panel:#2a1a20;--line:#4a3438}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Tajawal,Tahoma,sans-serif;overflow:hidden}
+#app{position:relative;height:100%}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lb{position:absolute;transform:translate(-50%,-50%);font-size:11px;font-weight:500;white-space:nowrap;color:var(--ink);background:color-mix(in srgb,var(--bg) 78%,transparent);padding:1px 5px;border-radius:3px}
+header{position:absolute;top:10px;right:14px;left:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+h1{margin:0;font-family:Amiri,serif;font-size:clamp(18px,3.2vw,28px);color:var(--bur);line-height:1.3}
+header p{margin:2px 0 0;font-size:13px;color:var(--gold)}
+.bar{position:absolute;top:70px;right:14px;display:flex;flex-direction:column;gap:6px}
+.grp{display:flex;flex-direction:column;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px}
+.grp b{font-size:11px;color:var(--gold);font-weight:500;padding:0 4px}
+button{font:inherit;font-size:13px;cursor:pointer;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 10px;text-align:right}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+button.on{background:var(--bur);color:#fbf7ee;border-color:var(--bur)}
+#panel{position:absolute;left:14px;bottom:14px;width:min(320px,calc(100% - 28px));background:var(--panel);border:1px solid var(--line);border-inline-start:4px solid var(--gold);border-radius:8px;padding:12px 14px}
+#panel h2{margin:0 0 4px;font-family:Amiri,serif;font-size:21px;color:var(--bur)}
+#panel p{margin:3px 0;font-size:13.5px;line-height:1.7}
+#hint{position:absolute;bottom:14px;right:14px;font-size:12px;opacity:.75;max-width:220px}
+@media(max-width:640px){.bar{top:64px}.grp{padding:4px}#hint{display:none}#panel{bottom:8px}button{padding:5px 8px;font-size:12px}}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="labels"></div>
+<header><div><h1>جولة المدرسة ثلاثية الأبعاد</h1><p>مدرسة البنات – جبل عمّان · من جذورنا، نصنع المستقبل</p></div></header>
+<div class="bar"><div class="grp" id="fl"><b>الطوابق</b></div><div class="grp" id="vw"><b>الانتقال إلى</b></div><div class="grp"><button id="lbt" class="on">أسماء الغرف</button></div></div>
+<div id="hint">اسحب للتدوير · اقرص أو مرّر للتكبير · اضغط على أي غرفة لمعرفة اسمها</div>
+<div id="panel"><h2>مرحبًا بك في الحرم المدرسي</h2><p>نموذج مبني على المخططات الرسمية للمدرسة. اختر طابقًا أو اضغط على غرفة.</p><p style="font-size:12px;opacity:.7">الأبعاد تقريبية لأن المخططات لا تتضمن مقياس رسم.</p></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const A=document.getElementById('app'),LB=document.getElementById('labels'),FH=3.2;
+const R=new THREE.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));A.prepend(R.domElement);
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(45,1,.1,500);
+function theme(){S.background=new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#f6f0e2')}
+theme();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',theme);
+S.add(new THREE.AmbientLight(0xffffff,.78));const DL=new THREE.DirectionalLight(0xffffff,.55);DL.position.set(30,60,20);S.add(DL);
+const OC=new THREE.OrbitControls(C,R.domElement);OC.enableDamping=true;OC.maxPolarAngle=Math.PI/2.05;OC.minDistance=6;OC.maxDistance=140;
+const COL={class:0xe2d3b3,admin:0x8a2c3d,lab:0x3f7a80,art:0xb08d4a,svc:0x9a9486,out:0x7a8a66};
+const KIND={class:'صفّ دراسي',admin:'مكتب إداري',lab:'مختبر',art:'نشاط وفنون',svc:'خدمات ومرافق',out:'مرفق خارجي'};
+const FN=['الطابق الأرضي','الطابق الأول','الطابق الثاني'];
+const rooms=[],slabs=[],pick=[];
+const g0=new THREE.Mesh(new THREE.BoxGeometry(76,.3,52),new THREE.MeshLambertMaterial({color:0xd9cdb0}));g0.position.set(37,-.15,24.5);S.add(g0);
+function box(grp,n,k,x,z,w,d,y,h,info){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:COL[k],transparent:true,opacity:.62}));
+ m.position.set(x+w/2,y+h/2,z+d/2);m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x3a1018})));
+ m.userData=Object.assign({n,k},info);grp.add(m);pick.push(m);
+ const el=document.createElement('div');el.className='lb';el.textContent=n;LB.appendChild(el);rooms.push({m,el,h});return m}
+function plan(grp,b,fl,o,list){const[ox,oy,pw,ph,W,D]=o,X=p=>(p-ox)/pw*W,Z=p=>(p-oy)/ph*D;
+ const s=new THREE.Mesh(new THREE.BoxGeometry(W,.2,D),new THREE.MeshLambertMaterial({color:0xefe6d0}));s.position.set(W/2,fl*FH-.1,D/2);grp.add(s);slabs.push({m:s,fl});
+ list.forEach(r=>{const[n,k,a,c,e,f,note,h]=r;box(grp,n,k,X(a),Z(c),X(e)-X(a),Z(f)-Z(c),fl*FH,h||2.9,{b,fl,note})})}
+// ---- Main building (ground / 1st / 2nd) ----
+const MAIN=new THREE.Group();MAIN.position.set(35,0,2);S.add(MAIN);
+const gO=[165,105,920,640,36,30];
+plan(MAIN,'المبنى الرئيسي',0,gO,[
+['التاسع ب','class',165,105,352,180],['التاسع ج','class',352,105,522,180],['العاشر أ','class',522,105,692,180],['العاشر ب','class',692,105,863,180],['العاشر ج','class',863,105,978,180],['حمّام طالبات','svc',1008,105,1085,180],
+['الثاني الأكاديمي ب','class',1008,185,1085,255],['الثاني الأكاديمي ج','class',1008,258,1085,325],['غرفة الموسيقى','art',995,330,1085,435],['الثاني الثانوي الأكاديمي أ','class',1008,440,1085,500],['درج','svc',1008,505,1085,545],['المستودع','svc',1008,548,1085,590],['مكتب المرشدة','admin',1008,592,1085,655],['الثاني BTEC','class',990,660,1085,745],
+['الأول الثانوي الأكاديمي ج','class',852,660,990,745],['الأول الثانوي الأكاديمي ب','class',675,660,852,745],['الأول الثانوي الأكاديمي أ','class',470,660,675,745],['مكتب مساعدة المديرة','admin',410,660,470,745],['مكتب المديرة','admin',165,660,240,745],['مطبخ','svc',248,650,340,680,'يظهر في المخطط الرسمي باسم «مطبخ».',2.2],
+['حمّام المعلمات','svc',165,600,240,655],['غرفة المعلمات (1)','admin',165,520,240,600],['غرفة المعلمات (2)','admin',165,450,240,520],['غرفة المعلمات (3)','admin',165,375,240,450],['غرفة المعلمات (4)','admin',165,298,240,375],['المستودع والدرج','svc',165,262,240,295],['مكتب الإداري','admin',165,185,240,225]]);
+plan(MAIN,'المبنى الرئيسي',1,[135,100,940,635,36,30],[
+['التاسع أ','class',135,100,330,175],['الخامس أ','class',330,100,500,175],['الخامس ب','class',505,100,675,175],['الخامس ج','class',680,100,850,175],['السابع ج','class',850,100,965,175],['حمّام طالبات','svc',1000,100,1075,170],
+['العلوم المنزلية','lab',1000,175,1075,270,'مختبر العلوم المنزلية يقع في الطابق الأول بحسب المخطط الرسمي.'],['غرفة المعلمات','admin',1000,275,1075,345],['غرفة مساعدة المديرة','admin',1003,360,1043,440],['صف سابع','class',1045,335,1078,495,'الاسم غير واضح في المخطط الأصلي ويلزم تأكيده من المدرسة.'],['درج','svc',1000,505,1075,545],['غرفة معلمات (7)','admin',1000,585,1075,650],['السابع أ','class',980,655,1075,735],
+['الثامن أ','class',840,655,975,735],['الثامن ب','class',705,655,838,735],['الثامن ج','class',462,655,675,735],['العاشر BTEC','class',310,655,460,735],['الأول الثانوي BTEC','class',215,655,308,735,'القراءة من المخطط الأصلي تقريبية.'],
+['السادس أ','class',135,585,215,655],['السادس ب','class',135,455,215,580],['الإذاعة','art',135,405,215,450],['السادس ج','class',135,285,215,400],['درج','svc',135,215,215,250],['غرفة معلمات (5)','admin',135,175,212,215]]);
+const M2=new THREE.Group();M2.position.set(28,0,4);MAIN.add(M2);
+plan(M2,'المبنى الرئيسي',2,[345,105,320,765,8,20],[
+['مختبر الروبتكس','lab',345,105,665,355,'موضع هذا الطابق فوق المبنى تقريبي؛ المخطط لا يحدده.'],['درج','svc',345,355,665,435],['غرفة الموسيقى','art',345,435,590,645,'موضع هذا الطابق فوق المبنى تقريبي؛ المخطط لا يحدده.'],['مكتبة المدرسة','art',345,645,665,870,'موضع هذا الطابق فوق المبنى تقريبي؛ المخطط لا يحدده.']]);
+// ---- Laboratory building ----
+const LAB=new THREE.Group();LAB.position.set(0,0,.4);LAB.scale.set(.64,1,.96);S.add(LAB);
+plan(LAB,'مبنى المختبرات',0,[140,120,1010,620,22,13.5],[
+['مختبر الكيمياء','lab',140,120,445,485],['مشتل زجاجي','lab',445,120,755,280],['مختبر الفيزياء','lab',755,120,1150,565],['غرفة قيّم المختبر','admin',335,485,470,590],['درج','svc',475,565,580,740],['المدخل','svc',580,565,675,740],['حمّامات الطالبات','svc',675,565,1150,740]]);
+plan(LAB,'مبنى المختبرات',1,[165,175,910,570,22,13.5],[
+['المشاغل الفنية','art',165,175,405,415],['BTEC','class',405,175,690,415],['مختبر الأحياء','lab',690,175,1075,415],['مختبر حاسوب 2','lab',165,415,350,745],['غرفة معلمتا الحاسوب','admin',350,610,540,745],['درج','svc',540,610,650,745],['دورة المياه','svc',650,650,695,735],['غرفة قيّم المختبر','admin',695,610,810,745],['مختبر حاسوب 1','lab',810,415,1075,745]]);
+plan(LAB,'مبنى المختبرات',2,[135,105,940,625,22,13.5],[
+['منطقة أجهزة الرصد الجوي الخارجي','lab',135,105,1075,730,'سطح مكشوف تُوضع عليه أجهزة الرصد الجوي الخارجي.',.25],['أجهزة الرصد الجوي الداخلي','lab',215,380,637,728],['مدخل طابق الرصد الجوي','svc',637,380,832,580],['درج','svc',637,580,832,728]]);
+// ---- Site (outdoor) ----
+const SX=p=>(p-85)*.07,SZ=p=>(p-120)*.07,ST=new THREE.Group();S.add(ST);
+[['العيادة','svc',293,125,385,228,3],['البيت البلاستيكي','out',388,125,493,178,2.4],['كشك الحارس','svc',533,740,640,785,2.6],['مستودع رياضي','svc',768,745,872,800,2.6],['المقصف المدرسي','svc',1040,660,1135,765,3],['مساحة مظلّلة في المخطط (غير مسمّاة)','out',85,408,290,800,.6,'تظهر في المخطط باللون الرمادي دون اسم.']]
+.forEach(([n,k,a,b,c,d,h,note])=>box(ST,n,k,SX(a),SZ(b),SX(c)-SX(a),SZ(d)-SZ(b),0,h,{b:'الساحة الخارجية',fl:-1,note}));
+box(ST,'البوابة الرئيسية','admin',SX(690),SZ(745),3,1.4,0,1.4,{b:'الساحة الخارجية',fl:-1,note:'السهم السفلي في مخطط الموقع.'});
+// ---- UI ----
+let cur='all',sel=null,showL=true,tween=null;
+const INFO=document.getElementById('panel');
+function setFloor(f){cur=f;rooms.forEach(r=>{const u=r.m.userData;r.m.visible=(f==='all'||u.fl===f||u.fl===-1)});slabs.forEach(s=>s.m.visible=(f==='all'||s.fl===f));
+ document.querySelectorAll('#fl button').forEach(b=>b.classList.toggle('on',String(b.dataset.f)===String(f)))}
+const fl=document.getElementById('fl');
+[['all','كل الطوابق'],[0,FN[0]],[1,FN[1]],[2,FN[2]]].forEach(([f,t])=>{const b=document.createElement('button');b.textContent=t;b.dataset.f=f;b.onclick=()=>setFloor(f);fl.appendChild(b)});
+const V={all:[[37,0,24],[37,58,82]],main:[[53,2,17],[53,34,52]],lab:[[4.5,2,7],[6,15,26]],yard:[[44,0,38],[44,22,66]]};
+const vw=document.getElementById('vw');
+[['all','المدرسة كاملة'],['main','المبنى الرئيسي'],['lab','مبنى المختبرات'],['yard','الساحة والمدخل']].forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>fly(k);vw.appendChild(b)});
+function fly(k){tween={t:0,t0:OC.target.clone(),p0:C.position.clone(),t1:new THREE.Vector3(...V[k][0]),p1:new THREE.Vector3(...V[k][1])}}
+document.getElementById('lbt').onclick=e=>{showL=!showL;e.target.classList.toggle('on',showL)};
+function show(m){if(sel){sel.material.emissive.setHex(0);sel.material.opacity=.62}sel=m;if(!m)return;m.material.emissive.setHex(0x553300);m.material.opacity=.95;
+ const u=m.userData;INFO.innerHTML='';const h=document.createElement('h2');h.textContent=u.n;INFO.appendChild(h);
+ [KIND[u.k]+' · '+u.b+(u.fl>=0?' · '+FN[u.fl]:''),u.note||'بحسب المخطط الرسمي للمدرسة.'].forEach(t=>{const p=document.createElement('p');p.textContent=t;INFO.appendChild(p)})}
+const RC=new THREE.Raycaster(),P=new THREE.Vector2();let dn=null;
+function hit(e){const r=R.domElement.getBoundingClientRect();P.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);RC.setFromCamera(P,C);
+ return RC.intersectObjects(pick.filter(m=>m.visible),false)[0]}
+R.domElement.addEventListener('pointerdown',e=>dn=[e.clientX,e.clientY]);
+R.domElement.addEventListener('pointerup',e=>{if(dn&&Math.hypot(e.clientX-dn[0],e.clientY-dn[1])<6){const h=hit(e);if(h)show(h.object)}dn=null});
+R.domElement.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')R.domElement.style.cursor=hit(e)?'pointer':'grab'});
+function size(){const w=A.clientWidth,h=A.clientHeight;R.setSize(w,h);C.aspect=w/h;C.updateProjectionMatrix()}
+new ResizeObserver(size).observe(A);size();
+C.position.set(...V.all[1]);OC.target.set(...V.all[0]);setFloor('all');
+const v=new THREE.Vector3();
+(function loop(){requestAnimationFrame(loop);
+ if(tween){tween.t=Math.min(1,tween.t+.025);const k=tween.t<.5?2*tween.t*tween.t:1-Math.pow(-2*tween.t+2,2)/2;OC.target.lerpVectors(tween.t0,tween.t1,k);C.position.lerpVectors(tween.p0,tween.p1,k);if(tween.t>=1)tween=null}
+ OC.update();R.render(S,C);
+ const W=A.clientWidth,H=A.clientHeight,near=C.position.distanceTo(OC.target)<48||cur!=='all';
+ rooms.forEach(r=>{if(!showL||!near||!r.m.visible){r.el.style.display='none';return}
+  r.m.getWorldPosition(v);v.y+=r.h/2;v.project(C);
+  if(v.z>1){r.el.style.display='none';return}
+  r.el.style.display='block';r.el.style.left=(v.x*.5+.5)*W+'px';r.el.style.top=(-v.y*.5+.5)*H+'px'})})();
+</script>
+</body>
+</html>
